@@ -2,21 +2,24 @@
 let votedIPs = new Set();
 
 export async function onRequest(context) {
-  const { request } = context;
+  const { request, env } = context;
   
   if (request.method === 'GET') {
-    // Get client IP address
     const clientIP = request.headers.get('CF-Connecting-IP') || 
                     request.headers.get('X-Forwarded-For') || 
                     request.headers.get('X-Real-IP') || 
                     'unknown';
     
-    // Check if IP has voted
-    const hasVoted = votedIPs.has(clientIP);
-    
-    return new Response(JSON.stringify({ voted: hasVoted }), {
-      headers: { 'Content-Type': 'application/json' }
-    });
+    try {
+      const hasVoted = await env.VOTES_KV.get(`voted_${clientIP}`);
+      return new Response(JSON.stringify({ voted: !!hasVoted }), {
+        headers: { 'Content-Type': 'application/json' }
+      });
+    } catch (e) {
+      return new Response(JSON.stringify({ voted: false }), {
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
   }
   
   return new Response('Method not allowed', { status: 405 });
