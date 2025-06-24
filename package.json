@@ -1,0 +1,13 @@
+{
+  "name": "jeeting-vote",
+  "version": "1.0.0",
+  "description": "Vote for jeeting as staff lead",
+  "main": "index.html",
+  "scripts": {
+    "dev": "wrangler pages dev",
+    "deploy": "wrangler pages deploy"
+  },
+  "keywords": ["voting", "cloudflare-pages"],
+  "author": "adam",
+  "license": "MIT"
+}
