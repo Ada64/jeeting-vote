@@ -1,17 +1,18 @@
-// In-memory storage for tracking voted IPs
 let votedIPs = new Set();
 
 export async function onRequest(context) {
   const { request, env } = context;
   
   if (request.method === 'GET') {
-    const clientIP = request.headers.get('CF-Connecting-IP') || 
-                    request.headers.get('X-Forwarded-For') || 
-                    request.headers.get('X-Real-IP') || 
-                    'unknown';
-    
+    // Get discord_id from cookie
+    const cookie = request.headers.get('Cookie') || '';
+    const match = cookie.match(/discord_id=([^;]+)/);
+    const discordId = match ? match[1] : null;
+    if (!discordId) {
+      return new Response(JSON.stringify({ voted: false, error: 'Not logged in' }), { status: 401, headers: { 'Content-Type': 'application/json' } });
+    }
     try {
-      const hasVoted = await env.VOTES_KV.get(`voted_${clientIP}`);
+      const hasVoted = await env.VOTES_KV.get(`voted_${discordId}`);
       return new Response(JSON.stringify({ voted: !!hasVoted }), {
         headers: { 'Content-Type': 'application/json' }
       });
