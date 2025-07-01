@@ -324,6 +324,7 @@
         voteBtn.onclick = async function() {
             const discordId = getCookie('discord_id');
             if (!discordId) {
+                console.log('Not logged in, setting pendingVote');
                 localStorage.setItem('pendingVote', '1');
                 window.location.href = '/api/login';
                 return;
@@ -357,9 +358,12 @@
         };
 
         window.addEventListener('DOMContentLoaded', async function() {
+            console.log('DOMContentLoaded fired');
             if (localStorage.getItem('pendingVote') === '1') {
+                console.log('pendingVote detected');
                 localStorage.removeItem('pendingVote');
                 const discordId = getCookie('discord_id');
+                console.log('discordId:', discordId);
                 if (discordId) {
                     voteBtn.click();
                 }
