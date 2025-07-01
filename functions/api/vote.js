@@ -4,18 +4,22 @@ let votedIPs = new Set();
 export async function onRequest(context) {
   const { request, env } = context;
   
+  if (!env.VOTES_KV) {
+    return new Response(JSON.stringify({ error: 'KV not configured' }), { status: 500, headers: { 'Content-Type': 'application/json' } });
+  }
+
   if (request.method === 'POST') {
     // Get discord_id from cookie
     const cookie = request.headers.get('Cookie') || '';
     const match = cookie.match(/discord_id=([^;]+)/);
     const discordId = match ? match[1] : null;
     if (!discordId) {
-      return new Response(JSON.stringify({ error: 'Not logged in' }), { status: 401, headers: { 'Content-Type': 'application/json' } });
+      return new Response(JSON.stringify({ error: 'Not logged in', cookie }), { status: 401, headers: { 'Content-Type': 'application/json' } });
     }
     try {
       const hasVoted = await env.VOTES_KV.get(`voted_${discordId}`);
       if (hasVoted) {
-        return new Response(JSON.stringify({ error: 'Already voted' }), {
+        return new Response(JSON.stringify({ error: 'Already voted', discordId }), {
           status: 409,
           headers: { 'Content-Type': 'application/json' }
         });
@@ -27,12 +31,13 @@ export async function onRequest(context) {
       await env.VOTES_KV.put('total_votes', (currentVotes + 1).toString());
       return new Response(JSON.stringify({ 
         success: true, 
-        votes: currentVotes + 1
+        votes: currentVotes + 1,
+        discordId
       }), {
         headers: { 'Content-Type': 'application/json' }
       });
     } catch (e) {
-      return new Response(JSON.stringify({ error: 'Server error' }), {
+      return new Response(JSON.stringify({ error: 'Server error', details: e.message }), {
         status: 500,
         headers: { 'Content-Type': 'application/json' }
       });

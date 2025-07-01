@@ -8,7 +8,7 @@ export async function onRequest(context) {
   const clientSecret = 'BPYA2lJBImlFS_jfyvN3qZNIlxj2I803';
   const redirectUri = 'https://miguel-vote.pages.dev/api/callback';
 
-  // Exchange code for token
+  // ex. code for tkn
   const tokenRes = await fetch('https://discord.com/api/oauth2/token', {
     method: 'POST',
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -30,7 +30,7 @@ export async function onRequest(context) {
   const tokenData = await tokenRes.json();
   if (!tokenData.access_token) return new Response('No token', { status: 400 });
 
-  // Get user info
+  // get pmo info
   const userRes = await fetch('https://discord.com/api/users/@me', {
     headers: { Authorization: `Bearer ${tokenData.access_token}` }
   });
@@ -40,7 +40,7 @@ export async function onRequest(context) {
   }
   const user = await userRes.json();
 
-  // Set cookie and redirect
+  // cookie (still KV storage available)
   return new Response(
     `<script>window.location.href='/'</script>`,
     {
