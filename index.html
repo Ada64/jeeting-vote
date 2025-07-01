@@ -324,6 +324,7 @@
         voteBtn.onclick = async function() {
             const discordId = getCookie('discord_id');
             if (!discordId) {
+                localStorage.setItem('pendingVote', '1');
                 window.location.href = '/api/login';
                 return;
             }
@@ -354,6 +355,16 @@
                 voteBtn.disabled = false;
             }
         };
+
+        window.addEventListener('DOMContentLoaded', async function() {
+            if (localStorage.getItem('pendingVote') === '1') {
+                localStorage.removeItem('pendingVote');
+                const discordId = getCookie('discord_id');
+                if (discordId) {
+                    voteBtn.click();
+                }
+            }
+        });
 
         document.getElementById('toResults').onclick = function(e) {
             e.preventDefault();
